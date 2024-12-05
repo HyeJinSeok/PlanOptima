@@ -4,3 +4,6 @@
 터미널이나 커맨드 라인에서 다음 명령어를 실행합니다:
 java -jar h2*.jar -tcp -tcpAllowOthers -ifNotExists
 
+2. 미완성된 기능
+
+   
