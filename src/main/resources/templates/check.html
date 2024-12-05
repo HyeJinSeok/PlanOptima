@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" href="/css/header.css">
+    <title>Check Your Schedule</title>
+    <style>
+        body {
+            background-color: #f5f5f5; /* 헤더 제외한 전체 배경색 */
+            color: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            margin: 0;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* h1 스타일 */
+        h1 {
+            font-size: 29px; /* 원하는 크기로 조정 */
+            color: #1a4364; /* 원하는 색상으로 조정 */
+            text-align: center;
+            margin: 60px 0px; /* 위아래 간격 조정 */
+            font-weight: bold; /* 굵기 조정 */
+            max-width: 900px; /* 최대 너비 조정 */
+        }
+
+        /* 그리드 배치 설정 */
+        .schedule-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 가로로 3개씩 배치 */
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .task-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: calc(33.33% - 20px); /* 각 그룹의 너비를 3개씩 배치 */
+            min-width: 250px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .task-group:hover {
+            transform: translateY(-5px);
+        }
+
+        .task-group h2 {
+            font-size: 24px;
+            color: #1a4364;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .schedule-item {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .schedule-item p {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin: 0;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .button-group button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #77d8ce;
+            color: white;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .button-group button:hover {
+            background-color: #4eb2a6;
+            transform: scale(1.1);
+        }
+
+        .improvement-button {
+            width: 90%;
+            height: 40px;
+            border-radius: 5px;
+            background-color: rgba(55, 154, 215, 0.52);
+            color: white;
+            border: none;
+            font-size: 16px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .improvement-button:hover {
+            background-color: #579cc7;
+        }
+
+        .improvement-message {
+            margin-top: 10px;
+            font-size: 16px;
+            color: red;
+            text-align: center;
+        }
+
+        .difference-message {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 10px;
+            width: 127%;
+        }
+
+        .difference-message-label {
+            font-size: 17px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .difference-values {
+            display: flex;
+            font-size: 17px;
+            gap: 8px;
+            text-align: right;
+        }
+
+        .highlight {
+            color: #007BFF;
+            margin-top: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div th:fragment="header">
+    <div class="header">
+        <h1>
+            <a th:href="@{/}" style="color: white; text-decoration: none;">Plan Optima</a>
+        </h1>
+        <div class="spacer"></div>
+        <ul class="menu">
+            <li><a th:href="@{/cabinet}">Cabinet</a></li>
+            <li><a href="/calendar">Calendar</a></li>
+            <li><a href="/check">Check</a></li>
+            <li><a href="#">About</a></li>
+        </ul>
+    </div>
+</div>
+
+<h1>유형별 피드백을 통해 Plan Optima의 추천시간을 개선해주세요.</h1>
+
+<div class="schedule-container" id="schedule-container"></div>
+
+<script th:inline="javascript">
+    const schedules = [[${schedules}]];
+
+    const taskGroups = schedules.reduce((groups, schedule) => {
+        if (!groups[schedule.taskTypeName]) {
+            groups[schedule.taskTypeName] = [];
+        }
+        groups[schedule.taskTypeName].push(schedule);
+        return groups;
+    }, {});
+
+    const scheduleContainer = document.getElementById('schedule-container');
+
+    for (const [taskTypeName, group] of Object.entries(taskGroups)) {
+        const groupDiv = document.createElement('div');
+        groupDiv.classList.add('task-group');
+        groupDiv.innerHTML = `<h2>[ ${taskTypeName} ]</h2>`;
+
+        let totalSchedules = group.length;
+        let selectedCount = 0;
+        let feedbackSum = 0;
+
+        group.forEach(schedule => {
+            const scheduleDiv = document.createElement('div');
+            scheduleDiv.classList.add('schedule-item');
+            scheduleDiv.innerHTML = `
+                <p>${schedule.name}</p>
+                <div class="button-group">
+                    <button value="-0.1">많이 남음</button>
+                    <button value="-0.04">남음</button>
+                    <button value="0">적절</button>
+                    <button value="0.06">부족</button>
+                    <button value="0.12">많이 부족</button>
+                </div>
+            `;
+
+            const buttonGroup = scheduleDiv.querySelector('.button-group');
+            const buttons = buttonGroup.querySelectorAll('button');
+            let selectedValue = null;
+
+            buttons.forEach(button => {
+                button.onclick = () => {
+                    if (selectedValue === null) {
+                        selectedValue = parseFloat(button.value);
+                        button.style.backgroundColor = '#4dd629';
+                        button.disabled = true;
+                        selectedCount++;
+                        feedbackSum += selectedValue;
+                    } else {
+                        buttons.forEach(btn => {
+                            if (parseFloat(btn.value) === selectedValue) {
+                                btn.style.backgroundColor = '';
+                                btn.disabled = false;
+                                selectedCount--;
+                                feedbackSum -= selectedValue;
+                            }
+                        });
+                        selectedValue = parseFloat(button.value);
+                        button.style.backgroundColor = '#4dd629';
+                        button.disabled = true;
+                        selectedCount++;
+                        feedbackSum += selectedValue;
+                    }
+                    console.log(`현재 피드백 합계: ${feedbackSum}`);
+                };
+            });
+
+            groupDiv.appendChild(scheduleDiv);
+        });
+
+        const improvementButton = document.createElement('button');
+        improvementButton.className = "improvement-button";
+        improvementButton.innerText = "개선하기";
+        improvementButton.onclick = () => {
+            improvementButton.disabled = true;
+            setTimeout(() => improvementButton.disabled = false, 60000);
+
+            const existingMessage = groupDiv.querySelector('.improvement-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            if (totalSchedules < 3) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('improvement-message');
+                messageDiv.innerText = "스케줄이 3개 이상이어야 가능합니다.";
+                // 줄바꿈 없이 표시되도록 스타일 적용
+                messageDiv.style.whiteSpace = "nowrap";
+
+                groupDiv.appendChild(messageDiv);
+                return;
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('improvement-message');
+
+            if (selectedCount === totalSchedules) {
+                messageDiv.innerText = "개선에 참여해주셔서 감사합니다!";
+                console.log(`보낼 피드백 합계: ${feedbackSum}`);
+
+                fetch(`/api/task/${taskTypeName}/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ feedbackSum: feedbackSum })
+                })
+                    .then(response => response.json())
+                    .then(differences => {
+                        console.log('가중치 변화량:', differences);
+
+                        Object.entries(differences).forEach(([key, values]) => {
+                            const diffMessage = document.createElement('div');
+                            diffMessage.classList.add('difference-message');
+
+                            diffMessage.innerHTML = `
+                                <div class="difference-message-label">${key}</div>
+                                <div class="difference-values">
+                                     <div class="difference-value">현재: <span class="highlight">${values.current.toPrecision(3).slice(0, -1)}</span></div>
+                                     <div class="difference-value">이전: <span class="highlight">${values.previous.toPrecision(3).slice(0, -1)}</span></div>
+                                     <div class="difference-value">차이(약): <span class="highlight">${values.difference.toPrecision(3).slice(0, -1)}</span></div>
+                                </div>
+                            `;
+                            groupDiv.appendChild(diffMessage);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('전송 중 오류 발생:', error);
+                    });
+            } else {
+                messageDiv.innerText = "항목을 다 체크해주세요.";
+            }
+            groupDiv.appendChild(messageDiv);
+        };
+
+        groupDiv.appendChild(improvementButton);
+        scheduleContainer.appendChild(groupDiv);
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,277 @@
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    background-color: #f5f5f5 !important; /* 헤더 제외한 전체 배경색 */
+}
+
+.container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 60px auto;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-section {
+    background-color: #e1f5fe;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.recommendation-section p {
+    font-size: 1.5rem;
+    margin: 20px 0;
+    line-height: 1.8;
+    color: #333;
+}
+
+.recommendation-section p span {
+    font-weight: bold;
+    color: #0277bd;
+}
+
+button {
+    background-color: #42a5f5;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+}
+
+button:hover {
+    background-color: #c783bf;
+    transform: translateY(-2px);
+}
+
+
+/******************************************************************************************8******/
+.info-container {
+    display: flex;
+    align-items: center;
+    margin-left: -560px;
+    margin-top: -20px;
+    color: black;
+    text-align: center;
+    position: relative;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.info-icon {
+    width: 21px;
+    height: 21px;
+    background-color: #ffffff; /* 내부 배경색을 흰색으로 설정 */
+    border: 1px solid #f45c5c; /* 테두리 추가 */
+    border-radius: 50%; /* 원형 모양 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #f45c5c;
+    margin-right: 7px;
+    cursor: pointer;
+}
+
+.info-container span {
+    font-size: 1.2rem;
+    color: #505050;
+}
+
+
+/* 기본적인 툴팁 스타일만 남김 */
+.tooltip {
+    display: none;
+    opacity: 0;
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 1000;
+    width: 400px; /* 너비 조정 */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/******************************************************************************************/
+/* 전체 질문 섹션 스타일 */
+.form-section {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: left; /* 전체 좌측 정렬 */
+    padding-left: 50px; /* 전체 여백 설정 */
+}
+
+.plus-info {
+    font-weight: bold;
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+    margin-left: 500px;
+    margin-top: -30px;
+    display: block;
+}
+
+.plus-info-label {
+    font-weight: bold;
+    font-size: 1.2rem; /* 글자 크기 조정 */
+    color: #505050; /* 글자 색상 */
+    display: block;
+    margin-top: -45px;
+    margin-bottom: 70px; /* 라벨과 입력 요소 사이의 간격 */
+    text-align: left; /* 좌측 정렬 */
+    padding-left: 48px; /* 약간의 왼쪽 여백 추가 */
+    font-family: 'Helvetica Neue', Arial, sans-serif; /* 같은 글씨체 */
+}
+
+/************************************************************************************************/
+.question-icon.question-label {
+    font-weight: normal;
+    font-size: 1.2rem;
+    color: #000000;
+    display: flex;
+    align-items: center;
+}
+
+
+/* 첫 번째 질문의 스타일 */
+.plus-question1 {
+    margin-top: -30px; /* 상단 여백 */
+    margin-bottom: 30px; /* 하단 여백 */
+    margin-left: 440px;
+}
+
+.plus-question1 .question-icon {
+    font-weight: normal;
+    font-size: 1.2rem;
+    color: #000000;
+    display: flex;
+    align-items: center;
+    padding-left: 48px; /* 질문 텍스트와 동일한 여백 */
+}
+
+/* 두 번째 질문의 스타일 */
+.plus-question2 {
+    margin-top: 15px;
+    margin-bottom: 30px;
+    margin-left: 440px;
+}
+
+.plus-question2 .question-icon {
+    font-weight: normal;
+    font-size: 1.2rem;
+    color: #000000;
+    display: flex;
+    align-items: center;
+    padding-left: 48px; /* 동일한 왼쪽 여백 */
+}
+
+
+.rest-time-preference, .time-preference {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-left: 30px;
+}
+
+.rest-option, .time-option {
+    padding: 15px 20px;
+    background-color: #fafafa;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 1.1rem;
+}
+
+.rest-option:hover, .time-option:hover {
+    background-color: #eeeeee;
+}
+
+
+/***************************************************************************************************/
+.selected {
+    background-color: #6faed3;
+    color: white;
+}
+
+.hidden {
+    display: none;
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-in forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+#loadingAnimation {
+    margin: 30px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #42a5f5;
+    margin: 0 8px;
+    animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-12px);
+    }
+}
+
+.loading-circle:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-circle:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+
+/* 아이콘 추가 */
+.question-icon::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,0 100,50 50,100 0,50" style="fill:%2300d9ff"/></svg>');
+    background-size: contain;
+    margin-right: 10px;
+    vertical-align: middle;
+}

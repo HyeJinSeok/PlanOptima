@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/header.css">
+    <title>Cabinet</title>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="/js/header.js" defer></script>
+
+    <style>
+        /* 기본 스타일 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5 !important;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 메인 섹션 스타일 */
+        main {
+            width: 1000px;
+            background-color: white;
+            padding: 50px 90px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-left: 120px;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            margin: 70px auto 30px auto;
+            font-size: 29px;
+            color: #1a4364;
+            text-align: center;
+        }
+
+        /* CSS 변수 정의 */
+        :root {
+            --schedule-box-width: 1fr;
+        }
+
+        /* 그리드 레이아웃 설정 */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(4, var(--schedule-box-width, 1fr));
+            gap: 30px;
+        }
+
+        /* 스케줄 박스 스타일 */
+        .schedule-box {
+            border: 1px solid #3f3f3f;
+            padding-left: 5px;
+            padding: 3px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        /* 스케줄 박스 호버 효과 */
+        .schedule-box:hover {
+            background-color: #f2f2f9; /* 배경색 변경 */
+            border-color: #3a3d3f; /* 테두리 색 변경 */
+        }
+
+        .schedule-box label {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        /* 체크박스 기본적으로 숨김 */
+        .checkbox {
+            display: none;
+        }
+
+        /* 체크 모드가 활성화될 때 체크박스를 보이도록 설정 */
+        .checkbox-enabled .checkbox {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        /* 체크모드 및 작업 버튼 스타일 */
+        #toggle-check-mode, #process-selection, #delete-selection {
+            font-size: 18px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: -20px;
+            margin-bottom: 28px;
+        }
+
+        #toggle-check-mode {
+            background-color: #099e8b;
+            color: white;
+        }
+
+        #toggle-check-mode:hover {
+            background-color: #0e8c7c;
+        }
+
+        #process-selection {
+            background-color: #62adca;
+            color: white;
+        }
+
+        #process-selection:hover {
+            background-color: #5393ac;
+        }
+
+        #delete-selection {
+            background-color: #c02e51;
+            color: white;
+        }
+
+        #delete-selection:hover {
+            background-color: #9e2643;
+        }
+
+        /* 버튼 컨테이너 스타일 */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 돌아가기 버튼 컨테이너 및 스타일 */
+        .back-button-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 13px 26px;
+            font-size: 20px;
+            color: white;
+            background: #3498db;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s ease-in-out;
+            border: none;
+        }
+
+        .back-button:hover {
+            background: #c783bf;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>
+        <a th:href="@{/}" style="color: white; text-decoration: none;">Plan Optima</a>
+    </h1>
+    <div class="spacer"></div>
+    <ul class="menu">
+        <li><a th:href="@{/cabinet}">Cabinet</a></li>
+        <li><a href="/calendar">Calendar</a></li>
+        <li><a href="/check">Check</a></li>
+        <li><a href="#">About</a></li>
+    </ul>
+</div>
+
+<h1>저장된 일정의 목록과 상세 정보를 확인해보세요.</h1>
+
+<main>
+    <div class="button-container">
+        <button id="toggle-check-mode">체크 모드</button>
+        <div class="action-buttons">
+            <button type="button" id="process-selection">선택된 항목 병합하기</button>
+            <button type="button" id="delete-selection">선택된 스케줄 삭제</button>
+        </div>
+    </div>
+
+    <form id="selection-form">
+        <div class="schedule-grid">
+            <div th:each="schedule : ${schedules}" class="schedule-box" th:data-id="${schedule.id}">
+                <label>
+                    <input type="checkbox" name="selectedSchedules" th:value="${schedule.id}" class="checkbox">
+                    <h3 th:text="${schedule.name}">Schedule Title</h3>
+                </label>
+            </div>
+        </div>
+    </form>
+
+    <div class="back-button-container">
+        <button type="button" class="back-button" onclick="window.history.back();">돌아가기</button>
+    </div>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const mainElement = document.querySelector('main');
+
+        // 체크 모드 설정
+        document.getElementById('toggle-check-mode').addEventListener('click', () => {
+            mainElement.classList.toggle('checkbox-enabled');
+        });
+
+        // 상세 페이지로 이동 방지
+        document.querySelectorAll('.schedule-box').forEach(box => {
+            box.addEventListener('click', (event) => {
+                if (!mainElement.classList.contains('checkbox-enabled')) {
+                    const scheduleId = box.getAttribute('data-id');
+                    window.location.href = `/schedule/${scheduleId}`;
+                }
+            });
+        });
+
+        // 선택된 항목 병합하기 버튼
+        document.getElementById('process-selection').addEventListener('click', () => {
+            const selectedIds = Array.from(document.querySelectorAll('.checkbox:checked'))
+                .map(checkbox => parseInt(checkbox.value, 10));
+            console.log("병합할 항목:", selectedIds);
+
+            fetch('/cabinet', {  // 병합 경로 수정
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ selectedSchedules: selectedIds })
+            })
+                .then(response => response.ok ? window.location.reload() : console.error('병합 실패'))
+                .catch(error => console.error('에러:', error));
+        });
+
+        // 선택된 스케줄 삭제 버튼
+        document.getElementById('delete-selection').addEventListener('click', () => {
+            const selectedIds = Array.from(document.querySelectorAll('.checkbox:checked'))
+                .map(checkbox => parseInt(checkbox.value, 10));
+            console.log("삭제할 항목:", selectedIds);
+
+            fetch('/cabinet/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ selectedSchedules: selectedIds })
+            })
+                .then(response => response.ok ? window.location.reload() : console.error('삭제 실패'))
+                .catch(error => console.error('에러:', error));
+        });
+
+
+    });
+</script>
+</body>
+</html>
