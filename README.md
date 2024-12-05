@@ -17,4 +17,5 @@ ex) 회원가입 버튼 - 아이디: hyejin / 비밀번호: 000623 / 이름: 석
 
 2) taskType 클래스의 calculateAdjustedTime 메서드가 임의로 정의된 상태. (수식 보완 예정)
 
+3) Cabinet 메뉴의 병합하기 기능 (차트 보완 예정)
 
