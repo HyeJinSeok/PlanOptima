@@ -6,7 +6,7 @@ java -jar h2*.jar -tcp -tcpAllowOthers -ifNotExists
 
 ## 2. 로그인 버튼을 통해 회원가입/로그인 진행
 
-ex) 아이디: hyejin / 비밀번호: 000623 / 이름: 석혜진
+ex) 회원가입 버튼 - 아이디: hyejin / 비밀번호: 000623 / 이름: 석혜진
 
 ## 3. 한 유형 당 3개 이상의 스케쥴이 생성되어야 Check 메뉴의 개선하기 기능이 작동합니다.
 
