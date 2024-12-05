@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendar Check</title>
+    <link rel="stylesheet" href="/css/header.css">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="/js/header.js" defer></script>
+    <style>
+        /* 헤더를 제외한 부분의 배경 및 기본 글자색 설정 */
+        body {
+            background-color: #f5f5f5; /* 헤더 제외한 전체 배경색 */
+            color: #000000; /* 기본 글자색 검정 */
+        }
+
+        .content {
+            padding: 20px;
+            margin: 20px;
+            text-align: center;
+            font-size: 17px;
+            color: #1a4364;
+        }
+
+        /* 캘린더 컨테이너 배경 스타일 */
+        .calendar-container {
+            background-color: #ffffff; /* 달력 부분 배경을 하얀색으로 설정 */
+            padding: 40px 60px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            margin: 0 auto; /* 가운데 정렬 */
+        }
+
+        /* 기본 스타일 */
+        #calendar {
+            margin: 0 auto;
+            max-width: 1000px;
+        }
+
+        .fc-daygrid-day {
+            cursor: pointer;
+        }
+
+        .fc-daygrid-day.fc-daygrid-day-selected {
+            background-color: lightblue !important;
+            color: white !important;
+        }
+
+        .fc-daygrid-day.fc-daygrid-day-highlight {
+            background-color: #fff9c4 !important; /* 연한 노랑색 */
+            border: 2px solid #ffab00 !important; /* 형광 주황색 테두리 */
+        }
+
+        .side-label {
+            display: none;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 20px;
+            background-color: red;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .save-button {
+            background-color: #5a9fd6;
+            color: #ffffff;
+            padding: 15px 32px;
+            text-align: center;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .save-button:hover {
+            background-color: #c783bf;
+        }
+
+        /* 요일 헤더의 배경색과 텍스트 색상 */
+        .fc-col-header-cell {
+            background-color: rgba(186, 209, 221, 0.26);
+            color: #153755;
+            font-weight: bold;
+            padding: 18px;
+        }
+
+        /* 토스트 메시지 스타일 */
+        .toast-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #74e4ce;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .side-label {
+                right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>
+        <a th:href="@{/}" style="color: white; text-decoration: none;">Plan Optima</a>
+    </h1>
+    <div class="spacer"></div>
+    <ul class="menu">
+        <li><a href="#">Cabinet</a></li>
+        <li><a href="/calendar">Calendar</a></li>
+        <li><a href="#">Check</a></li>
+        <li><a href="#">About</a></li>
+    </ul>
+</div>
+
+<div class="content">
+    <h1>일정을 할당할 날짜를 선택해주세요.</h1>
+
+    <!-- 달력과 버튼을 감싸는 컨테이너 -->
+    <div class="calendar-container">
+        <div id='calendar'></div>
+
+        <div class="side-label">
+            <span class="icon">✔</span>
+            <span id="adjustDays" th:text="${schedule.getOption() == 'flexible' ? '자유선택' : adjustDays}"></span>
+            <span th:unless="${schedule.getOption() == 'flexible'}">일</span>
+            <br>
+            <span id="adjustTime" th:text="${adjustTime}"> hours</span>
+        </div>
+
+        <div class="button-container">
+            <button id="saveDates" class="save-button">저장 완료</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast 메시지 컨테이너 -->
+<div id="toastMessage" class="toast-message">날짜가 성공적으로 저장되었습니다.</div>
+
+<!-- Hidden inputs to hold date values and schedule ID -->
+<input type="hidden" id="scheduleId" th:value="${id}">
+<input type="hidden" id="loginId" th:value="${loginId}">
+<input type="hidden" id="actualAdjustDays" th:value="${adjustDays}">
+
+<script>
+    function showTemporaryAlert(message, duration = 3000, redirectUrl = null) {
+        const toast = document.getElementById('toastMessage');
+        toast.textContent = message;
+        toast.classList.add('show');
+        toast.style.display = 'block';
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.style.display = 'none';
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
+            }, 500);
+        }, duration);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const adjustDaysText = document.getElementById('adjustDays').textContent;
+        const adjustDays = adjustDaysText === '자유선택'
+            ? parseInt(document.getElementById('actualAdjustDays').value, 10)
+            : parseInt(adjustDaysText, 10);
+        const scheduleId = document.getElementById('scheduleId').value;
+        let selectedDates = [];
+
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            selectable: true,
+            select: function(info) {
+                const dateStr = info.startStr;
+                if (selectedDates.includes(dateStr)) {
+                    const index = selectedDates.indexOf(dateStr);
+                    selectedDates.splice(index, 1);
+                } else {
+                    if (selectedDates.length < adjustDays) {
+                        selectedDates.push(dateStr);
+                    } else {
+                        showTemporaryAlert(`최대 ${adjustDays === Infinity ? '제한 없음' : adjustDays}일까지만 선택할 수 있습니다.`);
+                    }
+                }
+                updateCalendarEvents();
+            },
+            datesSet: function() {
+                updateCalendarEvents();
+            }
+        });
+
+        calendar.render();
+
+        function updateCalendarEvents() {
+            calendar.getEvents().forEach(event => event.remove());
+            selectedDates.forEach(dateStr => {
+                calendar.addEvent({
+                    title: '선택한 날짜',
+                    start: dateStr,
+                    end: new Date(new Date(dateStr).getTime() + 86400000).toISOString().split('T')[0],
+                    backgroundColor: '#2b6bb7',
+                    borderColor: 'lightblue'
+                });
+            });
+        }
+
+        document.getElementById('saveDates').addEventListener('click', function() {
+            fetch('/calendar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    selectedDates: selectedDates,
+                    scheduleId: parseInt(scheduleId, 10)
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        showTemporaryAlert("날짜가 성공적으로 저장되었습니다.", 3000, "/calendar");
+                    } else {
+                        showTemporaryAlert("날짜 저장 중 오류가 발생했습니다.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showTemporaryAlert("날짜 저장 중 오류가 발생했습니다.");
+                });
+        });
+    });
+</script>
+
+</body>
+</html>
