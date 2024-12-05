@@ -202,15 +202,6 @@
 
     <!-- 스크립트 추가 -->
     <script>
-
-        document.getElementById('username').addEventListener('input', function (event) {
-            const inputField = event.target;
-            const value = inputField.value;
-
-            // 영문, 숫자만 허용 (정규 표현식 사용)
-            inputField.value = value.replace(/[^a-zA-Z0-9]/g, '');
-        });
-
         function createSlider(id, inputId) {
             const slider = document.getElementById(id);
             const input = document.getElementById(inputId);
